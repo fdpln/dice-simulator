@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Статистика бросков костей</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+</head>
+<body>
+    <div id="interface"></div>
+    
+    <script type="text/javascript">
+        async function main() {
+            let pyodide = await loadPyodide({
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+            });
+            
+            await pyodide.loadPackage(["numpy", "matplotlib"]);
+            
+            const code = `
+import matplotlib.pyplot as plt
+import numpy as np
+from js import document
+from pyodide import create_proxy
+
+def run_simulation(_):
+    n_rolls = int(document.querySelector("#rolls").value)
+    n_dice = int(document.querySelector("#dice").value)
+    
+    # Ваша основная логика здесь...
+    
+    fig, ax = plt.subplots()
+    ax.hist(...)
+    display(fig, target="plot")
+    
+Element("interface").html('''
+<h1>Статистика бросков костей</h1>
+<input type="number" id="rolls" value="1000">
+<select id="dice">
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+</select>
+<button id="run">Запустить</button>
+<div id="plot"></div>
+''')
+
+run_button = document.querySelector("#run")
+run_button.addEventListener("click", create_proxy(run_simulation))
+            `;
+            
+            await pyodide.runPythonAsync(code);
+        }
+        main();
+    </script>
+</body>
+</html>
